@@ -110,7 +110,7 @@
       "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
       "gridPos": { "h": 8, "w": 16, "x": 8, "y": 13 },
       "id": 8,
-      "fieldConfig": { "defaults": { "custom": { "align": "auto" } }, "overrides": [{ "matcher": { "id": "byName", "options": "Revenue" }, "properties": [{ "id": "unit", "value": "currencyUSD" }, { "id": "custom.cellOptions", "value": { "type": "color-background", "mode": "gradient" } }, { "id": "color", "value": { "mode": "continuous-GrYlRd" } }] }] },
+      "fieldConfig": { "defaults": { "custom": { "align": "auto" } }, "overrides": [{ "matcher": { "id": "byName", "options": "Revenue" }, "properties": [{ "id": "unit", "value": "currencyUSD" }, { "id": "custom.cellOptions", "value": { "type": "color-background", "mode": "gradient" } }, { "id": "color", "value": { "mode": "continuous-BlPu" } }] }] },
       "options": { "showHeader": true, "cellHeight": "sm" },
       "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT c.name AS \"Customer\", c.region AS \"Region\", c.segment AS \"Segment\", SUM(i.amount) AS \"Revenue\" FROM invoices i JOIN customers c ON c.id = i.customer_id WHERE $__timeFilter(i.issue_date) AND c.region IN (${region:singlequote}) AND c.segment IN (${segment:singlequote}) GROUP BY 1, 2, 3 ORDER BY 4 DESC LIMIT 10;" }]
     }

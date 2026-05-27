@@ -43,8 +43,12 @@ priced AS (
                       WHEN 'Mid-Market'  THEN 3800
                       ELSE 1100
                   END * (0.6 + random()*0.8) * (1 + 0.03*midx))::numeric, 2) AS amount,
-           CASE WHEN random() < 0.85
-                THEN (issue_date + ((random()*45)::int) * interval '1 day')::date
+           -- Healthy collections: ~98.5% of invoices get paid 8-43 days after
+           -- issue, so anything older than a couple of months is already paid and
+           -- outstanding AR is dominated by recent invoices. The ~1.5% that stay
+           -- NULL are the small delinquent tail.
+           CASE WHEN random() < 0.985
+                THEN (issue_date + (8 + (random()*35)::int) * interval '1 day')::date
                 ELSE NULL
            END AS paid_raw
     FROM cand
