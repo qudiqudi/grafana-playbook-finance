@@ -1,0 +1,19 @@
+# Minimal Prometheus config for the playbook. Out of the box it only scrapes
+# Prometheus itself, which is enough for the data source to be live.
+#
+# To feed Grafana real-time operational finance metrics (payment success rate,
+# checkout latency, webhook lag), expose them from your billing/payments service
+# and add a scrape job here. See playbook/02-data-sources.md.
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # Example: a payments service exposing /metrics. Uncomment and adjust.
+  # - job_name: payments
+  #   static_configs:
+  #     - targets: ["payments:8080"]

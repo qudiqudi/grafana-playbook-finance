@@ -1,0 +1,101 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Total OpEx (Selected Period)",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "id": 1,
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 0, "color": { "mode": "fixed", "fixedColor": "red" } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "auto" },
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE $__timeFilter(incurred_at);" }]
+    },
+    {
+      "type": "stat",
+      "title": "Budget (Selected Period)",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "id": 2,
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 0, "color": { "mode": "fixed", "fixedColor": "blue" } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "auto" },
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT COALESCE(SUM(budgeted), 0) FROM budgets WHERE $__timeFilter(period_month);" }]
+    },
+    {
+      "type": "stat",
+      "title": "Budget Variance (Period)",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "id": 3,
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 0, "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 0.01 }] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "auto" },
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT (SELECT COALESCE(SUM(amount),0) FROM expenses WHERE $__timeFilter(incurred_at)) - (SELECT COALESCE(SUM(budgeted),0) FROM budgets WHERE $__timeFilter(period_month)) AS variance;" }]
+    },
+    {
+      "type": "stat",
+      "title": "Largest Expense Category (Period)",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "id": 4,
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "orange" } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "/.*/" }, "colorMode": "none", "graphMode": "none", "textMode": "value" },
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT category FROM expenses WHERE $__timeFilter(incurred_at) GROUP BY category ORDER BY SUM(amount) DESC LIMIT 1;" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Expenses by Category",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+      "gridPos": { "h": 9, "w": 16, "x": 0, "y": 4 },
+      "id": 5,
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "custom": { "drawStyle": "bars", "fillOpacity": 80, "lineWidth": 1, "stacking": { "mode": "normal", "group": "A" } }, "color": { "mode": "palette-classic" } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "right", "calcs": ["sum"] }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "time_series", "rawSql": "SELECT date_trunc('month', incurred_at)::date AS time, category AS metric, SUM(amount) AS amount FROM expenses WHERE $__timeFilter(incurred_at) GROUP BY 1, 2 ORDER BY 1;" }]
+    },
+    {
+      "type": "piechart",
+      "title": "Spend by Department",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+      "gridPos": { "h": 9, "w": 8, "x": 16, "y": 4 },
+      "id": 6,
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "color": { "mode": "palette-classic" } }, "overrides": [] },
+      "options": { "pieType": "donut", "legend": { "displayMode": "list", "placement": "right", "values": ["percent"] }, "reduceOptions": { "calcs": ["lastNotNull"], "values": true }, "tooltip": { "mode": "single" } },
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT department AS \"Department\", SUM(amount) AS \"Spend\" FROM expenses WHERE $__timeFilter(incurred_at) GROUP BY 1 ORDER BY 2 DESC;" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Budget vs Actual (Monthly Total)",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 13 },
+      "id": 7,
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "custom": { "drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "showPoints": "auto" }, "color": { "mode": "palette-classic" } }, "overrides": [{ "matcher": { "id": "byName", "options": "Budget" }, "properties": [{ "id": "color", "value": { "fixedColor": "blue", "mode": "fixed" } }, { "id": "custom.lineStyle", "value": { "fill": "dash", "dash": [8, 6] } }] }, { "matcher": { "id": "byName", "options": "Actual" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] }] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT m AS time, actual AS \"Actual\", budget AS \"Budget\" FROM (SELECT date_trunc('month', incurred_at)::date AS m, SUM(amount) AS actual FROM expenses GROUP BY 1) e FULL JOIN (SELECT period_month AS m, SUM(budgeted) AS budget FROM budgets GROUP BY 1) b USING (m) WHERE $__timeFilter(m) ORDER BY m;" }]
+    },
+    {
+      "type": "table",
+      "title": "Budget vs Actual by Category (This Month)",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 13 },
+      "id": 8,
+      "fieldConfig": { "defaults": { "custom": { "align": "auto" } }, "overrides": [{ "matcher": { "id": "byRegexp", "options": "Budget|Actual" }, "properties": [{ "id": "unit", "value": "currencyUSD" }] }, { "matcher": { "id": "byName", "options": "Variance" }, "properties": [{ "id": "unit", "value": "currencyUSD" }, { "id": "custom.cellOptions", "value": { "type": "color-background", "mode": "gradient" } }, { "id": "color", "value": { "mode": "continuous-GrYlRd" } }] }] },
+      "options": { "showHeader": true, "cellHeight": "sm" },
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT b.category AS \"Category\", b.budgeted AS \"Budget\", COALESCE(a.actual, 0) AS \"Actual\", COALESCE(a.actual, 0) - b.budgeted AS \"Variance\" FROM budgets b LEFT JOIN (SELECT category, SUM(amount) AS actual FROM expenses WHERE date_trunc('month', incurred_at) = date_trunc('month', CURRENT_DATE) GROUP BY 1) a ON a.category = b.category WHERE b.period_month = date_trunc('month', CURRENT_DATE)::date ORDER BY b.budgeted DESC;" }]
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 39,
+  "tags": ["finance", "expenses", "budget"],
+  "templating": { "list": [] },
+  "time": { "from": "now-18M", "to": "now" },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Expenses & Budget",
+  "uid": "fin-expenses-budget",
+  "version": 1,
+  "weekStart": ""
+}

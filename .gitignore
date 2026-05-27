@@ -1,0 +1,13 @@
+# Local Grafana state (we provision everything, so persisted state isn't tracked)
+grafana-storage/
+*.db
+
+# Env overrides
+.env
+.env.local
+
+# OS / editor
+.DS_Store
+*.swp
+.idea/
+.vscode/

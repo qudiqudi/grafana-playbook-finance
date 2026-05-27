@@ -1,0 +1,101 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Cash Balance",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "id": 1,
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 0, "color": { "mode": "fixed", "fixedColor": "blue" } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area", "textMode": "auto" },
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT cash_balance FROM v_cash_balance ORDER BY month DESC LIMIT 1;" }]
+    },
+    {
+      "type": "stat",
+      "title": "Net Cash Flow (This Month)",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "id": 2,
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 0, "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 0 }] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "auto" },
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT net_cash_flow FROM v_monthly_cashflow WHERE month = date_trunc('month', CURRENT_DATE)::date;" }]
+    },
+    {
+      "type": "stat",
+      "title": "Cash In (This Month)",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "id": 3,
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 0, "color": { "mode": "fixed", "fixedColor": "green" } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "auto" },
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT cash_in FROM v_monthly_cashflow WHERE month = date_trunc('month', CURRENT_DATE)::date;" }]
+    },
+    {
+      "type": "stat",
+      "title": "Cash Out (This Month)",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "id": 4,
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 0, "color": { "mode": "fixed", "fixedColor": "red" } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "auto" },
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT cash_out FROM v_monthly_cashflow WHERE month = date_trunc('month', CURRENT_DATE)::date;" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Cash In vs Cash Out",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 4 },
+      "id": 5,
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "custom": { "drawStyle": "bars", "fillOpacity": 80, "lineWidth": 1 }, "color": { "mode": "palette-classic" } }, "overrides": [{ "matcher": { "id": "byName", "options": "Cash In" }, "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }] }, { "matcher": { "id": "byName", "options": "Cash Out" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] }] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT month AS time, cash_in AS \"Cash In\", cash_out AS \"Cash Out\" FROM v_monthly_cashflow WHERE $__timeFilter(month) ORDER BY month;" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Net Cash Flow",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 4 },
+      "id": 6,
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "custom": { "drawStyle": "bars", "fillOpacity": 70, "lineWidth": 1, "gradientMode": "scheme" }, "color": { "mode": "continuous-RdYlGr" } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "single" } },
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT month AS time, net_cash_flow AS \"Net Cash Flow\" FROM v_monthly_cashflow WHERE $__timeFilter(month) ORDER BY month;" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Cash Balance Trend",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+      "gridPos": { "h": 8, "w": 16, "x": 0, "y": 13 },
+      "id": 7,
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "custom": { "drawStyle": "line", "fillOpacity": 20, "lineWidth": 2, "gradientMode": "opacity", "showPoints": "always", "pointSize": 5 }, "color": { "mode": "fixed", "fixedColor": "blue" } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "single" } },
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT month AS time, cash_balance AS \"Cash Balance\" FROM v_cash_balance WHERE $__timeFilter(month) ORDER BY month;" }]
+    },
+    {
+      "type": "table",
+      "title": "Accounts Receivable Aging",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 13 },
+      "id": 8,
+      "fieldConfig": { "defaults": { "custom": { "align": "auto" } }, "overrides": [{ "matcher": { "id": "byName", "options": "Outstanding" }, "properties": [{ "id": "unit", "value": "currencyUSD" }, { "id": "custom.cellOptions", "value": { "type": "color-background", "mode": "gradient" } }, { "id": "color", "value": { "mode": "continuous-GrYlRd" } }] }] },
+      "options": { "showHeader": true, "cellHeight": "sm" },
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT bucket AS \"Aging Bucket\", SUM(amount) AS \"Outstanding\" FROM (SELECT amount, CASE WHEN CURRENT_DATE - due_date <= 0 THEN 'Current' WHEN CURRENT_DATE - due_date <= 30 THEN '1-30 days' WHEN CURRENT_DATE - due_date <= 60 THEN '31-60 days' WHEN CURRENT_DATE - due_date <= 90 THEN '61-90 days' ELSE '90+ days' END AS bucket, CASE WHEN CURRENT_DATE - due_date <= 0 THEN 0 WHEN CURRENT_DATE - due_date <= 30 THEN 1 WHEN CURRENT_DATE - due_date <= 60 THEN 2 WHEN CURRENT_DATE - due_date <= 90 THEN 3 ELSE 4 END AS sort FROM invoices WHERE status IN ('open','overdue')) t GROUP BY bucket, sort ORDER BY sort;" }]
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 39,
+  "tags": ["finance", "cash-flow"],
+  "templating": { "list": [] },
+  "time": { "from": "now-18M", "to": "now" },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Cash Flow",
+  "uid": "fin-cash-flow",
+  "version": 1,
+  "weekStart": ""
+}

@@ -1,0 +1,128 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "templating": {
+    "list": [
+      {
+        "name": "region",
+        "label": "Region",
+        "type": "query",
+        "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+        "query": "SELECT DISTINCT region FROM customers ORDER BY 1;",
+        "multi": true,
+        "includeAll": true,
+        "allValue": null,
+        "refresh": 1,
+        "current": { "text": ["All"], "value": ["$__all"] }
+      },
+      {
+        "name": "segment",
+        "label": "Segment",
+        "type": "query",
+        "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+        "query": "SELECT DISTINCT segment FROM customers ORDER BY 1;",
+        "multi": true,
+        "includeAll": true,
+        "allValue": null,
+        "refresh": 1,
+        "current": { "text": ["All"], "value": ["$__all"] }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Revenue (Selected Period)",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "id": 1,
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 0, "color": { "mode": "fixed", "fixedColor": "green" } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "auto" },
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT COALESCE(SUM(i.amount), 0) FROM invoices i JOIN customers c ON c.id = i.customer_id WHERE $__timeFilter(i.issue_date) AND c.region IN (${region:singlequote}) AND c.segment IN (${segment:singlequote});" }]
+    },
+    {
+      "type": "stat",
+      "title": "Invoices Issued",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "id": 2,
+      "fieldConfig": { "defaults": { "unit": "none", "decimals": 0, "color": { "mode": "fixed", "fixedColor": "blue" } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "auto" },
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT COUNT(*) FROM invoices i JOIN customers c ON c.id = i.customer_id WHERE $__timeFilter(i.issue_date) AND c.region IN (${region:singlequote}) AND c.segment IN (${segment:singlequote});" }]
+    },
+    {
+      "type": "stat",
+      "title": "Avg Invoice Value",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "id": 3,
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 0, "color": { "mode": "fixed", "fixedColor": "purple" } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "auto" },
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT COALESCE(AVG(i.amount), 0) FROM invoices i JOIN customers c ON c.id = i.customer_id WHERE $__timeFilter(i.issue_date) AND c.region IN (${region:singlequote}) AND c.segment IN (${segment:singlequote});" }]
+    },
+    {
+      "type": "stat",
+      "title": "Paying Customers",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "id": 4,
+      "fieldConfig": { "defaults": { "unit": "none", "decimals": 0, "color": { "mode": "fixed", "fixedColor": "orange" } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "textMode": "auto" },
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT COUNT(DISTINCT i.customer_id) FROM invoices i JOIN customers c ON c.id = i.customer_id WHERE $__timeFilter(i.issue_date) AND c.region IN (${region:singlequote}) AND c.segment IN (${segment:singlequote});" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Monthly Revenue Trend",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+      "gridPos": { "h": 9, "w": 16, "x": 0, "y": 4 },
+      "id": 5,
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "custom": { "drawStyle": "line", "fillOpacity": 15, "lineWidth": 2, "gradientMode": "opacity", "showPoints": "always", "pointSize": 5 }, "color": { "mode": "fixed", "fixedColor": "green" } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "single" } },
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT date_trunc('month', i.issue_date)::date AS time, SUM(i.amount) AS \"Revenue\" FROM invoices i JOIN customers c ON c.id = i.customer_id WHERE $__timeFilter(i.issue_date) AND c.region IN (${region:singlequote}) AND c.segment IN (${segment:singlequote}) GROUP BY 1 ORDER BY 1;" }]
+    },
+    {
+      "type": "piechart",
+      "title": "Revenue by Product",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+      "gridPos": { "h": 9, "w": 8, "x": 16, "y": 4 },
+      "id": 6,
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "color": { "mode": "palette-classic" } }, "overrides": [] },
+      "options": { "pieType": "donut", "legend": { "displayMode": "list", "placement": "right", "values": ["percent"] }, "reduceOptions": { "calcs": ["lastNotNull"], "values": true }, "tooltip": { "mode": "single" } },
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT i.product AS \"Product\", SUM(i.amount) AS \"Revenue\" FROM invoices i JOIN customers c ON c.id = i.customer_id WHERE $__timeFilter(i.issue_date) AND c.region IN (${region:singlequote}) AND c.segment IN (${segment:singlequote}) GROUP BY 1 ORDER BY 2 DESC;" }]
+    },
+    {
+      "type": "piechart",
+      "title": "Revenue by Region",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 13 },
+      "id": 7,
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "color": { "mode": "palette-classic" } }, "overrides": [] },
+      "options": { "pieType": "pie", "legend": { "displayMode": "list", "placement": "right", "values": ["percent"] }, "reduceOptions": { "calcs": ["lastNotNull"], "values": true }, "tooltip": { "mode": "single" } },
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT c.region AS \"Region\", SUM(i.amount) AS \"Revenue\" FROM invoices i JOIN customers c ON c.id = i.customer_id WHERE $__timeFilter(i.issue_date) AND c.region IN (${region:singlequote}) AND c.segment IN (${segment:singlequote}) GROUP BY 1 ORDER BY 2 DESC;" }]
+    },
+    {
+      "type": "table",
+      "title": "Top 10 Customers by Revenue",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+      "gridPos": { "h": 8, "w": 16, "x": 8, "y": 13 },
+      "id": 8,
+      "fieldConfig": { "defaults": { "custom": { "align": "auto" } }, "overrides": [{ "matcher": { "id": "byName", "options": "Revenue" }, "properties": [{ "id": "unit", "value": "currencyUSD" }, { "id": "custom.cellOptions", "value": { "type": "color-background", "mode": "gradient" } }, { "id": "color", "value": { "mode": "continuous-GrYlRd" } }] }] },
+      "options": { "showHeader": true, "cellHeight": "sm" },
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT c.name AS \"Customer\", c.region AS \"Region\", c.segment AS \"Segment\", SUM(i.amount) AS \"Revenue\" FROM invoices i JOIN customers c ON c.id = i.customer_id WHERE $__timeFilter(i.issue_date) AND c.region IN (${region:singlequote}) AND c.segment IN (${segment:singlequote}) GROUP BY 1, 2, 3 ORDER BY 4 DESC LIMIT 10;" }]
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 39,
+  "tags": ["finance", "revenue", "sales"],
+  "time": { "from": "now-18M", "to": "now" },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Revenue & Sales",
+  "uid": "fin-revenue-sales",
+  "version": 1,
+  "weekStart": ""
+}

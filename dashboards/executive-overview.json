@@ -1,0 +1,141 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Revenue (This Month)",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "id": 1,
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 0, "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "area", "justifyMode": "auto", "textMode": "auto" },
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT revenue FROM v_monthly_revenue WHERE month = date_trunc('month', CURRENT_DATE)::date;" }]
+    },
+    {
+      "type": "stat",
+      "title": "Net Profit (This Month)",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "id": 2,
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 0, "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 0 }] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "area", "justifyMode": "auto", "textMode": "auto" },
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT net_profit FROM v_monthly_pnl WHERE month = date_trunc('month', CURRENT_DATE)::date;" }]
+    },
+    {
+      "type": "stat",
+      "title": "Cash Balance",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "id": 3,
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 0, "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "area", "justifyMode": "auto", "textMode": "auto" },
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT cash_balance FROM v_cash_balance ORDER BY month DESC LIMIT 1;" }]
+    },
+    {
+      "type": "stat",
+      "title": "Runway (months of OpEx)",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "id": 4,
+      "fieldConfig": { "defaults": { "unit": "none", "decimals": 1, "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "orange", "value": 6 }, { "color": "green", "value": 12 }] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "none", "justifyMode": "auto", "textMode": "auto" },
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT (SELECT cash_balance FROM v_cash_balance ORDER BY month DESC LIMIT 1) / NULLIF(AVG(expenses), 0) AS runway FROM v_monthly_expenses WHERE month >= date_trunc('month', CURRENT_DATE) - interval '3 month';" }]
+    },
+    {
+      "type": "stat",
+      "title": "Cash Collected (MTD)",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 4 },
+      "id": 5,
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 0, "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "none", "justifyMode": "auto", "textMode": "auto" },
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT COALESCE(SUM(amount), 0) FROM invoices WHERE paid_date >= date_trunc('month', CURRENT_DATE);" }]
+    },
+    {
+      "type": "stat",
+      "title": "Outstanding AR",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 4 },
+      "id": 6,
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 0, "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "none", "justifyMode": "auto", "textMode": "auto" },
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT COALESCE(SUM(amount), 0) FROM invoices WHERE status IN ('open','overdue');" }]
+    },
+    {
+      "type": "stat",
+      "title": "Overdue AR",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 4 },
+      "id": 7,
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 0, "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 1 }] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "none", "justifyMode": "auto", "textMode": "auto" },
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT COALESCE(SUM(amount), 0) FROM invoices WHERE status = 'overdue';" }]
+    },
+    {
+      "type": "stat",
+      "title": "Net Margin (This Month)",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 4 },
+      "id": 8,
+      "fieldConfig": { "defaults": { "unit": "percent", "decimals": 1, "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "orange", "value": 0 }, { "color": "green", "value": 15 }] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "none", "justifyMode": "auto", "textMode": "auto" },
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT CASE WHEN revenue > 0 THEN net_profit / revenue * 100 END FROM v_monthly_pnl WHERE month = date_trunc('month', CURRENT_DATE)::date;" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Revenue vs Expenses",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 8 },
+      "id": 9,
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "custom": { "drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "spanNulls": true, "showPoints": "auto" }, "color": { "mode": "palette-classic" } }, "overrides": [{ "matcher": { "id": "byName", "options": "Expenses" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] }, { "matcher": { "id": "byName", "options": "Revenue" }, "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }] }] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "calcs": [] }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT month AS time, revenue AS \"Revenue\", expenses AS \"Expenses\" FROM v_monthly_pnl WHERE $__timeFilter(month) ORDER BY month;" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Net Profit / (Loss)",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 8 },
+      "id": 10,
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "custom": { "drawStyle": "bars", "fillOpacity": 70, "lineWidth": 1, "gradientMode": "scheme" }, "color": { "mode": "continuous-RdYlGr" } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "single" } },
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT month AS time, net_profit AS \"Net Profit\" FROM v_monthly_pnl WHERE $__timeFilter(month) ORDER BY month;" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Cash Balance Trend",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 17 },
+      "id": 11,
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "custom": { "drawStyle": "line", "fillOpacity": 20, "lineWidth": 2, "gradientMode": "opacity" }, "color": { "mode": "fixed", "fixedColor": "blue" } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "single" } },
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT month AS time, cash_balance AS \"Cash Balance\" FROM v_cash_balance WHERE $__timeFilter(month) ORDER BY month;" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Revenue by Segment",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 17 },
+      "id": 12,
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "custom": { "drawStyle": "bars", "fillOpacity": 80, "lineWidth": 1, "stacking": { "mode": "normal", "group": "A" } }, "color": { "mode": "palette-classic" } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "time_series", "rawSql": "SELECT date_trunc('month', i.issue_date)::date AS time, c.segment AS metric, SUM(i.amount) AS revenue FROM invoices i JOIN customers c ON c.id = i.customer_id WHERE $__timeFilter(i.issue_date) GROUP BY 1, 2 ORDER BY 1;" }]
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 39,
+  "tags": ["finance", "executive"],
+  "templating": { "list": [] },
+  "time": { "from": "now-18M", "to": "now" },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Executive Overview",
+  "uid": "fin-exec-overview",
+  "version": 1,
+  "weekStart": ""
+}

@@ -1,0 +1,29 @@
+apiVersion: 1
+
+# Fixed UIDs here are referenced by every dashboard JSON, which is what lets the
+# dashboards render immediately on first boot. Keep these UIDs stable.
+datasources:
+  - name: finance-postgres
+    uid: finance-postgres
+    type: grafana-postgresql-datasource
+    access: proxy
+    url: postgres:5432
+    user: finance
+    jsonData:
+      database: finance
+      sslmode: disable
+      postgresVersion: 1600
+      timescaledb: false
+    secureJsonData:
+      password: finance
+    isDefault: true
+    editable: true
+
+  - name: finance-prometheus
+    uid: finance-prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    jsonData:
+      httpMethod: POST
+    editable: true

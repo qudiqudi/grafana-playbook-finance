@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grafana Playbook: Business Finance Visualization</title>
+<meta name="description" content="A runnable Grafana playbook for visualizing business finance — revenue, cash flow, expenses, budgets, and executive KPIs. Docker stack, seeded data, and four provisioned dashboards.">
+<style>
+  :root {
+    --bg: #0b0c0e;
+    --panel: #16181d;
+    --panel-2: #1c1f26;
+    --border: #2a2e37;
+    --text: #d8d9da;
+    --muted: #8e8e8e;
+    --green: #73bf69;
+    --orange: #ff9830;
+    --blue: #5794f2;
+    --accent: linear-gradient(135deg, #ff9830, #f2cc0c);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+  }
+  a { color: var(--blue); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+  header {
+    padding: 80px 0 56px;
+    border-bottom: 1px solid var(--border);
+    background:
+      radial-gradient(900px 320px at 80% -10%, rgba(255,152,48,0.14), transparent),
+      radial-gradient(700px 300px at 10% 0%, rgba(87,148,242,0.12), transparent);
+  }
+  .badge {
+    display: inline-block; font-size: 13px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--orange); border: 1px solid var(--border); border-radius: 999px;
+    padding: 4px 14px; margin-bottom: 22px; background: var(--panel);
+  }
+  h1 { font-size: 44px; line-height: 1.12; margin: 0 0 16px; font-weight: 700; letter-spacing: -0.02em; }
+  h1 .grad { background: var(--accent); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .sub { font-size: 19px; color: var(--muted); max-width: 680px; margin: 0 0 32px; }
+  .cta { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px; font-weight: 600; font-size: 15px;
+    padding: 11px 20px; border-radius: 8px; border: 1px solid var(--border);
+  }
+  .btn.primary { background: var(--accent); color: #1a1205; border: none; }
+  .btn.primary:hover { text-decoration: none; opacity: .92; }
+  .btn.ghost { background: var(--panel); color: var(--text); }
+  .btn.ghost:hover { text-decoration: none; border-color: #3a3f4a; }
+
+  code.cmd {
+    display: inline-block; background: #000; border: 1px solid var(--border); border-radius: 8px;
+    padding: 11px 16px; font-family: "SF Mono", ui-monospace, Menlo, monospace; font-size: 14px;
+    color: var(--green); margin-top: 26px;
+  }
+  code.cmd .p { color: var(--muted); }
+
+  section { padding: 64px 0; border-bottom: 1px solid var(--border); }
+  h2 { font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; font-weight: 600; }
+  .lead { font-size: 26px; font-weight: 700; margin: 0 0 40px; letter-spacing: -0.01em; }
+
+  .card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+    overflow: hidden; margin-bottom: 40px;
+  }
+  .card .shot { display: block; width: 100%; height: auto; border-bottom: 1px solid var(--border); }
+  .card .body { padding: 22px 26px 26px; }
+  .card h3 { margin: 0 0 6px; font-size: 21px; }
+  .card .tag { font-size: 12px; color: var(--orange); letter-spacing: .06em; text-transform: uppercase; }
+  .card p { margin: 8px 0 0; color: var(--muted); }
+
+  .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+  .feature { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 22px; }
+  .feature h4 { margin: 0 0 8px; font-size: 16px; }
+  .feature p { margin: 0; color: var(--muted); font-size: 15px; }
+
+  footer { padding: 48px 0 80px; color: var(--muted); font-size: 14px; }
+  footer a { color: var(--muted); }
+
+  @media (max-width: 640px) {
+    h1 { font-size: 34px; }
+    .lead { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <span class="badge">Grafana Playbook</span>
+    <h1>Business finance,<br><span class="grad">visualized properly.</span></h1>
+    <p class="sub">A runnable playbook for putting revenue, cash flow, expenses, and the executive
+      KPIs that sit on top of them in front of the people who make decisions. One command
+      brings up Grafana, a seeded Postgres, and four provisioned dashboards.</p>
+    <div class="cta">
+      <a class="btn primary" href="https://github.com/qudiqudi/grafana-playbook-finance">View on GitHub</a>
+      <a class="btn ghost" href="#dashboards">See the dashboards</a>
+    </div>
+    <div><code class="cmd"><span class="p">$</span> git clone …/grafana-playbook-finance &amp;&amp; docker compose up -d</code></div>
+  </div>
+</header>
+
+<section id="dashboards">
+  <div class="wrap">
+    <h2>The dashboards</h2>
+    <p class="lead">Four views, each answering one question a finance team actually asks.</p>
+
+    <div class="card">
+      <img class="shot" src="images/executive-overview.png" alt="Executive Overview dashboard" loading="lazy">
+      <div class="body">
+        <span class="tag">Executive Overview</span>
+        <h3>How is the business doing this month?</h3>
+        <p>The headline read: revenue, net profit, cash balance, and runway up top, then revenue
+          versus expenses, monthly profit, the cash trend, and revenue by segment below. The one
+          screen you'd send the board.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <img class="shot" src="images/revenue-and-sales.png" alt="Revenue & Sales dashboard" loading="lazy">
+      <div class="body">
+        <span class="tag">Revenue &amp; Sales</span>
+        <h3>Where is revenue coming from?</h3>
+        <p>Filterable by region and segment. Monthly revenue trend, revenue by product and region,
+          and a ranked table of the top customers with color-graded values.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <img class="shot" src="images/cash-flow.png" alt="Cash Flow dashboard" loading="lazy">
+      <div class="body">
+        <span class="tag">Cash Flow</span>
+        <h3>Are we cash-positive, and what are we owed?</h3>
+        <p>Cash in versus cash out, net cash flow, the running balance, and an accounts-receivable
+          aging table that flags the 90+ day bucket in red.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <img class="shot" src="images/expenses-and-budget.png" alt="Expenses & Budget dashboard" loading="lazy">
+      <div class="body">
+        <span class="tag">Expenses &amp; Budget</span>
+        <h3>Are we on budget, and where is money going?</h3>
+        <p>OpEx versus budget with variance, expenses stacked by category over time, spend by
+          department, and a budget-vs-actual breakdown per category for the month.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>What's in the box</h2>
+    <p class="lead">Not just dashboards — the reasoning and the data to back them.</p>
+    <div class="features">
+      <div class="feature">
+        <h4>One-command stack</h4>
+        <p>Docker Compose brings up Grafana, PostgreSQL, and Prometheus, fully provisioned. No
+          manual clicking to see it work.</p>
+      </div>
+      <div class="feature">
+        <h4>Seeded finance data</h4>
+        <p>~18 months of realistic invoices, expenses, and budgets generated on first boot, so
+          every panel renders immediately.</p>
+      </div>
+      <div class="feature">
+        <h4>Readable SQL</h4>
+        <p>Every metric maps to SQL you can read. The queries double as the definition of how each
+          number is calculated.</p>
+      </div>
+      <div class="feature">
+        <h4>The written playbook</h4>
+        <p>Six chapters on data sources, metric definitions, dashboard design, alerting, and
+          running it in production.</p>
+      </div>
+      <div class="feature">
+        <h4>Source-agnostic</h4>
+        <p>SQL by default, with patterns that transfer to MySQL, BigQuery, Snowflake, and
+          Prometheus.</p>
+      </div>
+      <div class="feature">
+        <h4>Versioned as code</h4>
+        <p>Dashboards live as JSON in the repo. Changes are reviewable in pull requests, not buried
+          in a UI.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    MIT licensed. Built as a reference, not financial advice. Screenshots use generated mock data.
+    &nbsp;·&nbsp; <a href="https://github.com/qudiqudi/grafana-playbook-finance">github.com/qudiqudi/grafana-playbook-finance</a>
+  </div>
+</footer>
+
+</body>
+</html>
