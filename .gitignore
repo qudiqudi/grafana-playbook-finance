@@ -6,6 +6,10 @@ grafana-storage/
 .env
 .env.local
 
+# Local-only compose override (used to spin up the image renderer; carries a token)
+docker-compose.override.yml
+docker-compose.*.local.yml
+
 # OS / editor
 .DS_Store
 *.swp
