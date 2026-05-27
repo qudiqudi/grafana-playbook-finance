@@ -78,13 +78,13 @@
     },
     {
       "type": "stat",
-      "title": "Net Margin (This Month)",
+      "title": "Net Margin (Last Full Month)",
       "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" },
       "gridPos": { "h": 4, "w": 6, "x": 18, "y": 4 },
       "id": 8,
       "fieldConfig": { "defaults": { "unit": "percent", "decimals": 1, "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "orange", "value": 0 }, { "color": "green", "value": 15 }] } }, "overrides": [] },
       "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "none", "justifyMode": "auto", "textMode": "auto" },
-      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT CASE WHEN revenue > 0 THEN net_profit / revenue * 100 END FROM v_monthly_pnl WHERE month = date_trunc('month', CURRENT_DATE)::date;" }]
+      "targets": [{ "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "finance-postgres" }, "format": "table", "rawSql": "SELECT CASE WHEN revenue > 0 THEN net_profit / revenue * 100 END FROM v_monthly_pnl WHERE month = (date_trunc('month', CURRENT_DATE) - interval '1 month')::date;" }]
     },
     {
       "type": "timeseries",

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #0b0c0e; color: #d8d9da; position: relative;
+  }
+  .shot {
+    position: absolute; inset: 0;
+    background: url('images/executive-overview.png') no-repeat right top;
+    background-size: 980px auto;
+    background-position: 360px -10px;
+    opacity: 0.5;
+  }
+  .overlay {
+    position: absolute; inset: 0;
+    background:
+      linear-gradient(100deg, #0b0c0e 30%, rgba(11,12,14,0.85) 48%, rgba(11,12,14,0.35) 70%, rgba(11,12,14,0.1) 100%),
+      radial-gradient(700px 360px at 0% 0%, rgba(255,152,48,0.18), transparent),
+      radial-gradient(600px 320px at 5% 100%, rgba(87,148,242,0.16), transparent);
+  }
+  .content { position: absolute; inset: 0; padding: 72px 0 72px 72px; display: flex; flex-direction: column; justify-content: center; width: 760px; }
+  .badge {
+    display: inline-block; align-self: flex-start; font-size: 18px; letter-spacing: .12em; text-transform: uppercase;
+    color: #ff9830; border: 1px solid #2a2e37; border-radius: 999px; padding: 8px 20px; margin-bottom: 30px; background: #16181d;
+  }
+  h1 { font-size: 70px; line-height: 1.05; font-weight: 800; letter-spacing: -0.02em; color: #f4f5f5; }
+  h1 .grad { background: linear-gradient(135deg, #ff9830, #f2cc0c); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  p.sub { font-size: 27px; color: #a7a9ad; margin-top: 26px; max-width: 640px; line-height: 1.4; }
+  .foot { margin-top: 40px; display: flex; align-items: center; gap: 18px; }
+  .cmd { font-family: "SF Mono", ui-monospace, Menlo, monospace; font-size: 20px; color: #73bf69; background: #000; border: 1px solid #2a2e37; border-radius: 8px; padding: 12px 18px; }
+  .repo { font-size: 20px; color: #8e8e8e; }
+</style>
+</head>
+<body>
+  <div class="shot"></div>
+  <div class="overlay"></div>
+  <div class="content">
+    <span class="badge">Grafana Playbook</span>
+    <h1>Business finance,<br><span class="grad">visualized properly.</span></h1>
+    <p class="sub">Revenue, cash flow, expenses, budgets, and executive KPIs — a runnable Grafana stack with seeded data.</p>
+    <div class="foot">
+      <span class="cmd">$ docker compose up -d</span>
+      <span class="repo">github.com/qudiqudi</span>
+    </div>
+  </div>
+</body>
+</html>
